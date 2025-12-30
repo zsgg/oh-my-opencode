@@ -28,16 +28,19 @@ git fetch upstream
 깔끔한 선형 히스토리 유지.
 
 ```bash
-git checkout dev
 git rebase upstream/dev
 ```
 
 ## 4. Fork에 Push
 
-Rebase 후 force push 필요:
+새 브랜치 생성 후 push:
 
 ```bash
-git push origin dev --force-with-lease
+# 타임스탬프 브랜치 생성
+git checkout -b main-zsgg-$(date +%Y%m%d%H%M)
+
+# Push
+git push -u origin HEAD
 ```
 
 ## 충돌 해결
@@ -62,9 +65,9 @@ git rebase --continue
 | Upstream 추가 | `git remote add upstream <url>` |
 | Upstream fetch | `git fetch upstream` |
 | 브랜치 rebase | `git rebase upstream/<branch>` |
-| Fork에 push | `git push origin <branch> --force-with-lease` |
+| 새 브랜치 생성 | `git checkout -b main-zsgg-$(date +%Y%m%d%H%M)` |
+| Fork에 push | `git push -u origin HEAD` |
 
 ## 참고
 
-- `--force-with-lease`: 안전한 force push (다른 사람의 커밋 덮어쓰기 방지)
 - 정기적으로 동기화하면 충돌 최소화 가능
