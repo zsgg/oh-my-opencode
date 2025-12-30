@@ -1,8 +1,9 @@
 import { lstatSync, readlinkSync } from "fs"
 import { resolve } from "path"
 
-export function isMarkdownFile(entry: { name: string; isFile: () => boolean }): boolean {
-  return !entry.name.startsWith(".") && entry.name.endsWith(".md") && entry.isFile()
+export function isMarkdownFile(entry: { name: string; isFile: () => boolean; isSymbolicLink?: () => boolean }): boolean {
+  const isFileOrSymlink = entry.isFile() || (entry.isSymbolicLink?.() ?? false)
+  return !entry.name.startsWith(".") && entry.name.endsWith(".md") && isFileOrSymlink
 }
 
 export function isSymbolicLink(filePath: string): boolean {
