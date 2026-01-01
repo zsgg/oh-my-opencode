@@ -22,28 +22,33 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
    git fetch upstream
    ```
 
-3. **Upstream 브랜치에 rebase**
+3. **현재 상태 태그 생성 (rebase 전 백업)**
+   ```bash
+   git tag pre-sync/$(date +%Y%m%d-%H%M)
+   ```
+
+4. **Upstream 브랜치에 rebase**
    ```bash
    git rebase upstream/dev
    ```
 
-4. **충돌 발생 시 해결**
+5. **충돌 발생 시 해결**
    - 충돌 파일 확인: `git status`
    - 해결 후: `git add <파일>` → `git rebase --continue`
 
-5. **main-zsgg 브랜치에 force push**
+6. **main-zsgg 브랜치에 force push (태그 포함)**
    ```bash
    git checkout -B main-zsgg
-   git push -u origin main-zsgg --force
+   git push -u origin main-zsgg --force --tags
    ```
 
-6. **빌드**
+7. **빌드**
    ```bash
    bun install
    bun run build
    ```
 
-7. **로컬 링크 등록**
+8. **로컬 링크 등록**
    ```bash
    bun link && bun link oh-my-opencode --cwd ~/.config/opencode
    ```
@@ -52,7 +57,7 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
    ls -la ~/.config/opencode/node_modules/oh-my-opencode
    ```
 
-8. **완료 보고**
+9. **완료 보고**
    - 동기화 완료 확인
    - 빌드 성공 여부
    - 링크 적용 확인
