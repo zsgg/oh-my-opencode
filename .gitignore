@@ -29,3 +29,6 @@ yarn.lock
 test-injection/
 notepad.md
 oauth-success.html
+
+# Temporary files
+**/CLAUDE.md
