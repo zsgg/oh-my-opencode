@@ -47,17 +47,3 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
    bun install
    bun run build
    ```
-
-8. **로컬 링크 등록**
-   ```bash
-   bun link && bun link oh-my-opencode --cwd ~/.config/opencode
-   ```
-   - 링크 확인:
-   ```bash
-   ls -la ~/.config/opencode/node_modules/oh-my-opencode
-   ```
-
-9. **완료 보고**
-   - 동기화 완료 확인
-   - 빌드 성공 여부
-   - 링크 적용 확인
