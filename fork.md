@@ -1,0 +1,266 @@
+## Upstream Changelog
+
+**동기화 일시**: 2026-01-23 02:08
+**비교 범위**: HEAD..upstream/dev
+
+### 변경사항 요약
+
+#### Features
+- [febc32d] case-insensitive utilities for agent name matching 추가
+- [4b1ea12] keyword detector patterns 확장
+- [440e53a] prometheus-md-only 패턴 개선
+- [0edfc7f] category schema에 description 필드 추가
+- [76211a3] model resolution doctor check 추가
+- [bc62c23] fuzzy matching과 fetch를 사용한 model availability 추가
+- [f4a0d5e] agent/category fallback chains를 사용한 model requirements 추가
+- [ffe82c1] native cross-fallback과 OpenAI 분리로 model fallback 재설계
+- [c00f210] provider priority를 사용한 model fallback system 추가
+- [18e02a3] unstable agents에 대해 background mode 강제
+- [9729548] CategoryConfig에 is_unstable_agent 옵션 추가
+- [3be387d] category model catalog와 default models 추가
+- [3c67680] orchestrator-sisyphus에서 atlas로 migration mapping 추가
+- [193c176] omo-env context에 current date 추가
+- [7106706] workflow에 skip_platform input 추가
+- [faac9e9] ultrawork prompt에 mandatory certainty와 no-compromise 조항 추가
+- [92942a5] toast와 background_output에 pending/queued status 표시
+- [d6723a7] pending tasks 취소 지원
+- [54f4485] per-key queue processor 구현
+- [481770e] launch() non-blocking으로 변경
+- [b053df4] per-key queue 구조 추가
+- [426fb36] pending status와 queuedAt 필드 추가
+
+#### Fixes
+- [e15677e] v3.0.0 upgrade를 위한 hook rename/removal mappings 추가
+- [76a01d4] providerConcurrency/modelConcurrency에 0 허용 (provider 비활성화)
+- [dda502a] background-task와 session-manager 업데이트
+- [2690301] ast-grep 개선
+- [3f002ff] formatter와 events 수정
+- [bdbc8d7] 여러 hooks 수정
+- [e65d572] OPENCODE_CONFIG_DIR 환경변수 반영
+- [c8175c2] HTTP-based session tools override 되돌림
+- [89bde5c] HTTP-based session tools override
+- [ba756d7] republish mode에서 tags force push
+- [85b7e97] platform packages provenance 비활성화
+- [a25d48a] sisyphus-agent workflow에 default model 추가
+- [3bea6a0] 견고한 error handling, republish mode, tag/branch push 분리
+- [c70ca39] OpenCode defaults가 user agent config 덮어쓰기 방지
+- [1ab97bd] CLI에서 잘못된 --chatgpt 옵션을 --openai로 교체
+- [1a41061] 'skills' directory 경로 수정 및 OPENCODE_CONFIG_DIR 반영
+- [0031bf7] tool_result_missing false match 방지를 위한 error detection 순서 변경
+- [516edb4] unstable agents background 강제 시 result 대기
+- [6865995] parallel background explore/librarian prompts 복원
+- [65a567e] zod v4 record schema에 key type 추가
+- [824da62] Sisyphus/Atlas prompts에 categories와 skills 전달
+- [3d3d3e4] category built-in model이 inherited model보다 우선
+- [18262e7] Prometheus fallback 방지를 위해 updateSessionAgent 사용
+- [7ccb8fc] Sisyphus와 Prometheus agents에 question tool 활성화
+- [6a4add2] session creation retry mechanism 추가
+- [d61817b] 오타 수정 (IDEALY→IDEALLY, EXPLICITELY→EXPLICITLY)
+- [5ce9c98] README 파일들의 깨진 hyperlinks 수정
+- [5c88abd] object args 허용 및 quotes 제거
+- [6956ce0] config.data.model 접근 패턴 및 동적 config paths 수정
+- [c6fb0c7] optional sessionID와 startedAt 필드에 null checks 추가
+- [9710e10] pending task TTL에 queuedAt 사용
+- [933c0c9] pendingByParent에서 pending tasks 추적
+- [f39f77d] missing model config error message 수정
+- [681cc56] E404+OIDC expiration을 already-published로 처리
+- [d96bf1e] platform packages provenance 비활성화 (OIDC expiration 방지)
+- [f10734c] OIDC token expiration 방지를 위한 batch publishing 사용
+- [bf3f8e5] agent가 아직 실행 중일 때 premature task completion 방지
+- [6a4bac9] npm publish 병렬화 (OIDC token expiration 방지)
+- [c698a5b] categories와 agents에서 hardcoded model defaults 제거
+
+#### Refactor
+- [45b2782] agent names에 case-insensitive matching 사용
+- [ff92a4c] plugin handlers와 shared utils 업데이트
+- [cc7160b] delegate-task-retry naming consistency 업데이트
+- [7209821] task toast manager types와 logic 개선
+- [aa2b052] dynamic descriptions로 delegation 개선
+- [4ffb9b1] dynamic agent prompt builder 간소화
+- [0610ef8] atlas, prometheus, sisyphus-junior prompts 업데이트
+- [5e27cee] sisyphus prompt 간소화 및 generator script 제거
+- [de3a6aa] model resolution을 사용한 async agent creation
+- [04b026d] 새 resolution system으로 model fallback 간소화
+- [54b4844] 3-step resolution으로 model resolver 개선
+- [7f2eb0a] platform publish를 별도 workflow로 분리
+- [8b820c5] 병렬 platform jobs와 job당 fresh OIDC tokens
+- [d419bc3] atlas agent를 Atlas로 rename (naming consistency)
+- [3e52657] frontend-ui-ux-engineer 제거 및 prompt builder rename
+- [f188732] document-writer agent 제거 (writing category 사용)
+- [c46d57f] sisyphus-orchestrator를 atlas로 rename
+- [8cc9958] unbiased model selection을 위한 category system 재구조화
+- [2c3f1bf] installer에서 ChatGPT subscription check 제거
+- [52d9b30] atlas references 업데이트
+- [c4b862c] sisyphus-orchestrator를 atlas로 rename
+- [96bcd97] orchestrator-sisyphus를 atlas로 rename
+- [e05ac04] schema에서 orchestrator-sisyphus를 atlas로 rename
+- [8cad7cc] 사용하지 않는 createSisyphusJuniorAgent 함수 제거
+
+#### Tests
+- [bb14537] snapshots를 사용한 install command tests 추가
+- [4e8106b] non-interactive env hook 안정화
+- [ebaab5a] non-blocking queue tests 추가
+- [46189ee] DEFAULT_CATEGORIES variant handling tests 추가
+
+#### Docs
+- [83bcf70] category names 동기화 및 누락된 schema fields 추가
+- [638a314] AGENTS.md 파일들과 configuration docs 업데이트
+- [cd3f80d] Model Selection System 문서 추가
+- [29e7595] AGENTS.md 업데이트 (최신 stats와 commit hash)
+- [59d663d] atlas references 업데이트
+- [e40e42e] features.md에 agents, skills, commands, hooks 구조로 재구성
+- [d8d274f] ohmyopencode.com 사칭 사이트 경고 추가
+- [4566094] 모든 READMEs에 overview page reference 추가
+- [380b946] docs 업데이트
+- [f935231] plan writing
+- [b0bb404] docs update
+- [d929184] 언어별 READMEs 설치 가이드 동기화
+- [693c9e0] Features section을 docs/features.md로 추출
+
+#### Others
+- [d863dac] @boojongmin CLA 서명 (#989)
+- [66fd761] @kilhyeonjun CLA 서명 (#974)
+- [e1f3be1] @pipi-1997 CLA 서명 (#971)
+- [2eea5e5] @jonasherr CLA 서명 (#966)
+- [52acb37] @gigio1023 CLA 서명 (#965)
+- [3328249] sisyphus-dev-ai에 의한 변경
+- [8260824] @cs50victor CLA 서명 (#950)
+- [00df2ba] @masteryi-0018 CLA 서명 (#944)
+- [7efa337] @LilMGenius CLA 서명 (#938)
+- [8f94c59] sisyphus-dev-ai에 의한 변경
+- [4f7ce87] @cooco119 CLA 서명 (#931)
+- [d872515] @TheSmuks CLA 서명 (#929)
+- [e0c507a] @yebei199 CLA 서명 (#921)
+- [732ec85] mcp
+- [86e095c] @carlory CLA 서명 (#910)
+- [c941b5a] bun.lock과 package.json 동기화
+- [ac19243] release: v3.0.0-beta.12
+- [5d1f917] release: v3.0.0-beta.11
+- [c0ed300] @gilbrotheraway CLA 서명 (#908)
+- [fca3054] @ikx94 CLA 서명 (#902)
+- [c910820] gitignore 복원
+
+### 전체 커밋 목록
+- e15677e: fix(migration): add hook rename and removal mappings for v3.0.0 upgrade
+- 45b2782: refactor: use case-insensitive matching for agent names
+- febc32d: feat(shared): add case-insensitive utilities for agent name matching
+- 76a01d4: fix: allow 0 in providerConcurrency/modelConcurrency to disable providers
+- 83bcf70: docs: sync category names with code and add missing schema fields
+- 638a314: docs: update AGENTS.md files and configuration docs
+- ff92a4c: refactor: update plugin handlers and shared utils
+- dda502a: fix(tools): update background-task and session-manager
+- 2690301: fix(tools): minor ast-grep improvements
+- 3f002ff: fix(cli): minor fixes to formatter and events
+- bb14537: test(cli): add install command tests with snapshots
+- bdbc8d7: fix(hooks): minor fixes across multiple hooks
+- 4b1ea12: feat(hooks): extend keyword detector patterns
+- cc7160b: refactor(hooks): update delegate-task-retry naming consistency
+- 440e53a: feat(hooks): enhance prometheus-md-only with better patterns
+- 7209821: refactor(task-toast): improve task toast manager types and logic
+- aa2b052: refactor(delegate-task): enhance delegation with dynamic descriptions
+- 0edfc7f: feat(config): add description field to category schema
+- 4ffb9b1: refactor(agents): simplify dynamic agent prompt builder
+- 0610ef8: refactor(agents): update atlas, prometheus, sisyphus-junior prompts
+- 5e27cee: refactor(agents): streamline sisyphus prompt and remove generator script
+- de3a6aa: refactor(agents): make agent creation async with model resolution
+- 76211a3: feat(cli): add doctor check for model resolution
+- 04b026d: refactor(cli): simplify model fallback using new resolution system
+- 54b4844: refactor(shared): improve model resolver with 3-step resolution
+- bc62c23: feat(shared): add model availability with fuzzy matching and fetch
+- f4a0d5e: feat(shared): add model requirements with agent/category fallback chains
+- d863dac: @boojongmin has signed the CLA in code-yeongyu/oh-my-opencode#989
+- e65d572: fix: respect OPENCODE_CONFIG_DIR environment variable across all config paths
+- c8175c2: Revert "fix(tools): override OpenCode HTTP-based session tools with local implementation"
+- 7f2eb0a: refactor(ci): separate platform publish into dedicated workflow
+- 89bde5c: fix(tools): override OpenCode HTTP-based session tools with local implementation
+- ac19243: release: v3.0.0-beta.12
+- ba756d7: fix(publish): force push tags in republish mode
+- 8b820c5: refactor(publish): parallel platform jobs with fresh OIDC tokens per job
+- 85b7e97: fix(publish): disable provenance for platform packages via env override
+- a25d48a: fix(ci): add default model to sisyphus-agent workflow
+- 3bea6a0: fix(publish): robust error handling, republish mode, separate tag/branch push
+- c70ca39: fix: prevent OpenCode defaults from overwriting user agent config in oh-my-opencode.json
+- 66fd761: @kilhyeonjun has signed the CLA in code-yeongyu/oh-my-opencode#974
+- 1ab97bd: fix: replace invalid --chatgpt option with --openai in CLI
+- e1f3be1: @pipi-1997 has signed the CLA in code-yeongyu/oh-my-opencode#971
+- 2eea5e5: @jonasherr has signed the CLA in code-yeongyu/oh-my-opencode#966
+- 1a41061: fix: use correct 'skills' directory path and respect OPENCODE_CONFIG_DIR
+- 52acb37: @gigio1023 has signed the CLA in code-yeongyu/oh-my-opencode#965
+- 3328249: chore: changes by sisyphus-dev-ai
+- cd3f80d: docs: add Model Selection System documentation
+- ffe82c1: feat(cli): redesign model fallback with native cross-fallback and OpenAI separation
+- 0031bf7: fix(session-recovery): reorder error detection to prevent false tool_result_missing match
+- 516edb4: fix(delegate-task): wait for result when forcing unstable agents to background
+- c00f210: feat(cli): add model fallback system with provider priority
+- 6865995: fix(sisyphus): restore parallel background explore/librarian prompts
+- d419bc3: refactor: rename atlas agent to Atlas for naming consistency
+- 8260824: @cs50victor has signed the CLA in code-yeongyu/oh-my-opencode#950
+- 65a567e: fix(skill-mcp): add key type for zod v4 record schema
+- 00df2ba: @masteryi-0018 has signed the CLA in code-yeongyu/oh-my-opencode#944
+- 29e7595: docs: update AGENTS.md with latest stats and commit hash
+- 46189ee: test(delegate-task): add tests for DEFAULT_CATEGORIES variant handling
+- 18e02a3: feat(delegate-task): force background mode for unstable agents
+- 9729548: feat(config): add is_unstable_agent option to CategoryConfig
+- 824da62: fix(agents): pass categories and skills to Sisyphus/Atlas prompts
+- 3d3d3e4: fix(delegate-task): category built-in model takes precedence over inherited model
+- 3e52657: refactor(agents): remove frontend-ui-ux-engineer and rename prompt builder
+- f188732: refactor(agents): remove document-writer agent in favor of writing category
+- c46d57f: refactor(hooks): rename sisyphus-orchestrator to atlas
+- 8cc9958: refactor(delegate-task): restructure category system for unbiased model selection
+- 2c3f1bf: refactor(cli): remove ChatGPT subscription check from installer
+- 3be387d: feat(delegate-task): add category model catalog with default models
+- 59d663d: docs: update atlas references
+- 52d9b30: refactor(plugin): update atlas references
+- c4b862c: refactor(hooks): rename sisyphus-orchestrator to atlas
+- 96bcd97: refactor(agents): rename orchestrator-sisyphus to atlas
+- e05ac04: refactor(schema): rename orchestrator-sisyphus to atlas
+- 3c67680: feat(migration): add orchestrator-sisyphus to atlas mapping
+- 18262e7: fix(start-work): use updateSessionAgent instead of clearSessionAgent to prevent Prometheus fallback
+- 7ccb8fc: fix(permission): enable question tool for Sisyphus and Prometheus agents
+- e40e42e: docs: reorganize features.md with agents, skills, commands, hooks structure
+- 7efa337: @LilMGenius has signed the CLA in code-yeongyu/oh-my-opencode#938
+- 6a4add2: fix(cli/run): add retry mechanism for session creation
+- d61817b: fix: correct spelling errors (IDEALY→IDEALLY, EXPLICITELY→EXPLICITLY)
+- 8f94c59: chore: changes by sisyphus-dev-ai
+- 193c176: feat: add current date to omo-env context
+- 4f7ce87: @cooco119 has signed the CLA in code-yeongyu/oh-my-opencode#931
+- d872515: @TheSmuks has signed the CLA in code-yeongyu/oh-my-opencode#929
+- d8d274f: docs: add fraud warning about ohmyopencode.com impersonation site (#922)
+- 5ce9c98: fix: broken hyperlinks in README files
+- e0c507a: @yebei199 has signed the CLA in code-yeongyu/oh-my-opencode#921
+- 732ec85: mcp
+- 4566094: docs: add overview page reference to all READMEs
+- 86e095c: @carlory has signed the CLA in code-yeongyu/oh-my-opencode#910
+- c941b5a: chore: sync bun.lock with package.json
+- 5d1f917: release: v3.0.0-beta.11
+- 7106706: feat(publish): add skip_platform input to workflow
+- 681cc56: fix(publish): handle E404+OIDC expiration as already-published
+- d96bf1e: fix(publish): disable provenance for platform packages to avoid OIDC expiration
+- f10734c: fix(publish): use batch publishing to prevent OIDC token expiration
+- 380b946: docs
+- f935231: plan writing
+- b0bb404: docs update
+- bf3f8e5: fix(background-agent): prevent premature task completion when agent still running
+- faac9e9: feat(ultrawork): add mandatory certainty and no-compromise clauses to ultrawork prompt
+- d929184: docs: sync installation guides across language READMEs
+- 693c9e0: docs: extract Features section to docs/features.md
+- c0ed300: @gilbrotheraway has signed the CLA in code-yeongyu/oh-my-opencode#908
+- 5c88abd: fix(skill-mcp): allow object args and strip quotes
+- 6956ce0: fix: correct config.data.model access pattern and use dynamic config paths
+- 8cad7cc: refactor(agents): remove unused createSisyphusJuniorAgent function
+- 4e8106b: test: stabilize non-interactive env hook
+- c6fb0c7: fix(types): add null checks for optional sessionID and startedAt fields
+- ebaab5a: test(background-agent): add non-blocking queue tests
+- 92942a5: feat(ui): show pending/queued status in toast and background_output
+- 9710e10: fix(background-agent): use queuedAt for pending task TTL
+- d6723a7: feat(background-agent): support cancelling pending tasks
+- 933c0c9: fix(background-agent): track pending tasks in pendingByParent
+- 54f4485: feat(background-agent): implement per-key queue processor
+- 481770e: feat(background-agent): make launch() non-blocking
+- b053df4: feat(background-agent): add per-key queue structure
+- 426fb36: feat(background-agent): add pending status and queuedAt field
+- fca3054: @ikx94 has signed the CLA in code-yeongyu/oh-my-opencode#902
+- f39f77d: fix: correct error message for missing model config
+- 6a4bac9: fix(ci): parallelize npm publish to prevent OIDC token expiration
+- c910820: restore gitignore
+- c698a5b: fix: remove hardcoded model defaults from categories and agents

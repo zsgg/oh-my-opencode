@@ -76,3 +76,9 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
    bun install
    bun run build
    ```
+
+8. **fork-summary.md 생성**
+   - `fork.md`의 내용을 분석하여 사용자가 이해하기 쉬운 요약본 작성
+   - 주요 변경사항을 카테고리별로 정리
+   - 한 줄 요약 포함
+   - 파일 위치: `./fork-summary.md`
