@@ -8,18 +8,47 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
 
 ## 순서
 
-1. **Upstream remote 확인**
+1. **Changelog 분석 및 리포트 생성**
+   - upstream fetch 후 현재 HEAD와 upstream/dev 사이의 diff 분석
+   ```bash
+   git fetch upstream
+   git log HEAD..upstream/dev --oneline --no-merges
+   ```
+   - 각 커밋 메시지를 분석하여 changelog 생성
+   - 결과를 `./fork.md`에 출력 (아래 포맷 참고)
+
+   **fork.md 포맷:**
+   ```markdown
+   ## Upstream Changelog
+
+   **동기화 일시**: YYYY-MM-DD HH:MM
+   **비교 범위**: HEAD..upstream/dev
+
+   ### 변경사항 요약
+
+   #### Features
+   - [commit_hash] 커밋 메시지 요약
+
+   #### Fixes
+   - [commit_hash] 커밋 메시지 요약
+
+   #### Refactor
+   - [commit_hash] 커밋 메시지 요약
+
+   #### Others
+   - [commit_hash] 커밋 메시지 요약
+
+   ### 전체 커밋 목록
+   - commit_hash: 전체 커밋 메시지
+   ```
+
+2. **Upstream remote 확인**
    ```bash
    git remote -v
    ```
    - `upstream`이 없으면 추가:
    ```bash
    git remote add upstream https://github.com/code-yeongyu/oh-my-opencode.git
-   ```
-
-2. **Upstream 변경사항 가져오기**
-   ```bash
-   git fetch upstream
    ```
 
 3. **현재 상태 태그 생성 (rebase 전 백업)**
