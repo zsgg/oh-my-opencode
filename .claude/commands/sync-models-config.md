@@ -3,19 +3,25 @@
 oh-my-opencode 소스코드의 최신 에이전트 및 카테고리 설정을 분석하여 사용자 설정 파일(`$HOME/.config/opencode/oh-my-opencode.json`)을 동기화함.
 
 ## 목적
-- 소스코드에 정의된 최신 에이전트 및 카테고리 목록을 사용자 설정에 실시간 반영
-- 지원 중단된(Deprecated) 설정을 제거하고 누락된 설정을 보충
-- 하드코딩된 모델명을 유효한 공급자 모델로 변환하여 동기화
+
+- 소스코드의 **fallback chain 기본값**이 사용자 환경에서 지원되지 않는 provider일 수 있음
+- 이를 방지하기 위해 모든 에이전트/카테고리의 모델을 **명시적으로 설정 파일에 작성**
+- 설정 파일에 명시된 모델이 **소스코드의 fallback chain보다 우선**됨
 
 ## 핵심 원칙 (CRITICAL)
 
-**모든 에이전트와 카테고리는 JSON에 명시적으로 작성되어야 함.**
+**1. 모든 에이전트와 카테고리는 JSON에 명시적으로 작성되어야 함.**
 
-- ❌ 암시적 기본값 의존 금지
+- ❌ 암시적 기본값 의존 금지 (fallback chain에 미지원 provider 포함 가능)
 - ❌ "기존 설정 유지" 금지 (변환 규칙 적용 필수)
-- ✅ 소스코드에서 발견된 모든 항목을 JSON에 명시적으로 작성
-- ✅ temperature가 소스에 없으면 JSON에서도 생략 (명시된 것만 작성)
+- ✅ 소스코드에서 **매번 새로 탐색**하여 최신 목록/값 확인
+- ✅ temperature/variant가 소스에 명시된 경우만 JSON에 작성
 - ✅ **`agents`와 `categories` 내부 키는 알파벳 A→Z 순으로 정렬**
+
+**2. 설정 파일 경로**
+
+- **반드시** `$HOME/.config/opencode/oh-my-opencode.json`에 저장
+- 프로젝트별 설정이 아닌 사용자 전역 설정
 
 ## 모델 변환 규칙
 
@@ -24,7 +30,9 @@ oh-my-opencode 소스코드의 최신 에이전트 및 카테고리 설정을 �
 | 원본 모델 패턴 | 변환 후 모델 | 공급자 |
 |----------------|-------------|--------|
 | `openai/gpt-*` | `openai/gpt-5.2` | codex |
-| `opencode/*` | `google/antigravity-gemini-3-flash` | antigravity |
+| `openai/gpt-*-codex` | `openai/gpt-5.2` | codex |
+| `opencode/*` (모든 opencode 모델) | `anthropic/claude-sonnet-4-5` | claude |
+| `zai-coding-plan/*` (모든 zai 모델) | `anthropic/claude-sonnet-4-5` | claude |
 | `google/gemini-*-pro-preview` | `google/antigravity-gemini-3-pro-high` | antigravity |
 | `google/gemini-*-flash-preview` | `google/antigravity-gemini-3-flash` | antigravity |
 | `google/gemini-*-flash` | `google/antigravity-gemini-3-flash` | antigravity |
@@ -32,35 +40,66 @@ oh-my-opencode 소스코드의 최신 에이전트 및 카테고리 설정을 �
 | `anthropic/claude-sonnet-*` | `anthropic/claude-sonnet-4-5` | claude |
 | `anthropic/claude-opus-*` | `anthropic/claude-opus-4-5` | claude |
 
+**중요**: 미지원 provider의 모델은 모두 안전한 모델로 변환
+
 ## 실행 지침
 
 실행자는 매번 소스코드를 **새로 탐색(Fresh Discovery)**하여 현재 상태를 파악해야 함.
 
-### Step 1: 소스코드 탐색
+**소스코드가 자주 변경되므로 절대 이전 분석 결과나 이 프롬프트의 예시를 재사용하지 말 것.**
 
-1. **스키마에서 에이전트/카테고리 목록 확인**:
-   - `src/config/schema.ts`의 `OverridableAgentNameSchema` → 에이전트 이름 목록
-   - `src/config/schema.ts`의 `BuiltinCategoryNameSchema` → 카테고리 이름 목록
+### Step 1: 소스코드 탐색 (FRESH DISCOVERY)
 
-2. **각 에이전트별 DEFAULT_MODEL과 temperature 탐색**:
-   - `src/agents/*.ts` 파일들을 개별적으로 읽어서 `DEFAULT_MODEL`과 `temperature` 확인
-   - 주요 파일: `sisyphus.ts`, `sisyphus-junior.ts`, `orchestrator-sisyphus.ts`, `oracle.ts`, `librarian.ts`, `explore.ts`, `frontend-ui-ux-engineer.ts`, `document-writer.ts`, `multimodal-looker.ts`, `metis.ts`, `momus.ts`
+**1. 에이전트/카테고리 목록 확인:**
 
-3. **카테고리별 기본 설정 탐색**:
-   - `src/tools/sisyphus-task/constants.ts`의 `DEFAULT_CATEGORIES` 객체 전체 확인
+```
+src/config/schema.ts 파일을 읽고:
+- OverridableAgentNameSchema → JSON에 포함할 에이전트 목록
+- BuiltinCategoryNameSchema → JSON에 포함할 카테고리 목록
+```
+
+**2. 에이전트 기본 모델 확인:**
+
+```
+src/shared/model-requirements.ts 파일을 읽고:
+- AGENT_MODEL_REQUIREMENTS 객체에서 각 에이전트별 fallback chain 확인
+- fallback chain의 첫 번째 항목이 기본값
+- variant 필드가 있으면 기록
+```
+
+**3. 에이전트별 temperature 확인:**
+
+```
+src/agents/ 폴더의 각 에이전트 파일을 읽고:
+- temperature 값이 명시된 경우 기록
+- 명시되지 않은 경우 생략
+```
+
+**4. 카테고리 기본 모델 확인:**
+
+```
+src/shared/model-requirements.ts 파일을 읽고:
+- CATEGORY_MODEL_REQUIREMENTS 객체에서 각 카테고리별 fallback chain 확인
+
+src/tools/delegate-task/constants.ts 파일을 읽고:
+- DEFAULT_CATEGORIES 객체에서 variant, temperature 값 확인
+```
 
 ### Step 2: 기존 설정 파일 읽기
 
-JSON 저장 전에 **기존 설정 파일을 먼저 읽어서** 이후 비교에 사용:
-
-```
-기존 에이전트 목록: [...]
-기존 카테고리 목록: [...]
+```bash
+cat $HOME/.config/opencode/oh-my-opencode.json
 ```
 
 ### Step 3: 데이터 수집 및 변환
 
-소스코드에서 수집한 정보에 모델 변환 규칙을 적용하여 정리.
+소스코드에서 수집한 정보에 모델 변환 규칙을 적용:
+
+```
+원본: fallback chain 첫 번째 항목의 provider/model
+  ↓ 변환 규칙 적용
+결과: 사용자 환경에서 지원되는 provider/model
+```
 
 ### Step 4: JSON 생성 및 저장
 
@@ -68,111 +107,83 @@ JSON 저장 전에 **기존 설정 파일을 먼저 읽어서** 이후 비교에
 
 **정렬 규칙: `agents`와 `categories` 내부 키는 알파벳 A→Z 순으로 정렬.**
 
+**경로: `$HOME/.config/opencode/oh-my-opencode.json`**
+
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
-  "google_auth": false,
   "agents": {
-    "document-writer": { "model": "..." },
-    "explore": { "model": "...", "temperature": 0.1 },
-    "frontend-ui-ux-engineer": { "model": "..." },
-    "librarian": { "model": "...", "temperature": 0.1 },
-    "Metis (Plan Consultant)": { "model": "...", "temperature": 0.3 },
-    "Momus (Plan Reviewer)": { "model": "...", "temperature": 0.1 },
-    "multimodal-looker": { "model": "...", "temperature": 0.1 },
-    "oracle": { "model": "...", "temperature": 0.1 },
-    "orchestrator-sisyphus": { "model": "...", "temperature": 0.1 },
-    "Sisyphus": { "model": "..." },
-    "Sisyphus-Junior": { "model": "...", "temperature": 0.1 }
+    "[스키마에서 읽은 에이전트명]": { "model": "[변환된모델]" },
+    "[스키마에서 읽은 에이전트명]": { "model": "[변환된모델]", "temperature": [소스에서읽은값] }
   },
   "categories": {
-    "artistry": { "model": "...", "temperature": 0.9 },
-    "general": { "model": "...", "temperature": 0.3 },
-    "most-capable": { "model": "...", "temperature": 0.1 },
-    "quick": { "model": "...", "temperature": 0.3 },
-    "ultrabrain": { "model": "...", "temperature": 0.1 },
-    "visual-engineering": { "model": "...", "temperature": 0.7 },
-    "writing": { "model": "...", "temperature": 0.5 }
+    "[스키마에서 읽은 카테고리명]": { "model": "[변환된모델]" },
+    "[스키마에서 읽은 카테고리명]": { "model": "[변환된모델]", "variant": "[소스에서읽은값]" }
   }
 }
 ```
+
+**제외 대상 (JSON에 포함하지 않음):**
+- `build`, `plan` - OpenCode 기본 에이전트 (시스템 관리)
+- `OpenCode-Builder` - 시스템 내부용
+- 스키마에 정의되지 않은 에이전트/카테고리
 
 ### Step 5: 검증 (MANDATORY)
 
 저장 후 반드시 검증:
 
-1. **에이전트 개수 확인**: 스키마의 `OverridableAgentNameSchema` 항목 수 ≤ JSON의 `agents` 키 수
+1. **에이전트 개수 확인**: 스키마의 `OverridableAgentNameSchema` 항목 중 제외 대상 제외한 수 = JSON의 `agents` 키 수
 2. **카테고리 개수 확인**: 스키마의 `BuiltinCategoryNameSchema` 항목 수 = JSON의 `categories` 키 수
-3. **모델 형식 확인**: 모든 모델이 `codex`, `antigravity`, `claude` 공급자 형식인지 확인
-4. **정렬 확인**: `agents`와 `categories` 내부 키가 A→Z 순으로 정렬되어 있는지 확인
+3. **모델 형식 확인**: 모든 모델이 변환 규칙에 따른 형식인지 확인
+4. **미지원 provider 없음 확인**: 변환 규칙 테이블의 "원본 모델 패턴"에 해당하는 provider 모델이 없어야 함
+5. **정렬 확인**: `agents`와 `categories` 내부 키가 A→Z 순으로 정렬되어 있는지 확인
 
-검증 실패 시 Step 2부터 재수행.
+검증 실패 시 Step 1부터 재수행.
 
 ### Step 6: 변경사항 보고 (MANDATORY)
-
-**소스코드의 DEFAULT 값과 변환 후 값을 비교하여 변경사항을 보고.**
-
-**변경의 기준**: 소스코드의 DEFAULT_MODEL이 `a`인데, 변환 규칙에 의해 `b`로 변환되었을 때 = "변경됨"
-
-표를 사용하지 말고 블릿 형식으로 작성.
 
 ```markdown
 ## 동기화 결과
 
 ### 변경됨 (모델 변환 적용됨)
 
-소스코드 DEFAULT 값이 변환 규칙에 의해 다른 모델로 변환된 항목:
+소스코드 fallback chain 첫 번째 값이 변환 규칙에 의해 다른 모델로 변환된 항목:
 
 **에이전트:**
-- `에이전트명`
-  - model: `소스코드DEFAULT` → `변환후모델`
+- `[에이전트명]`
+  - model: `[원본모델]` → `[변환후모델]`
 
 **카테고리:**
-- `카테고리명`
-  - model: `소스코드DEFAULT` → `변환후모델`
+- `[카테고리명]`
+  - model: `[원본모델]` → `[변환후모델]`
 
 ### 유지됨 (변환 없음)
 
-소스코드 DEFAULT 값이 그대로 사용된 항목:
+소스코드 fallback chain 값이 그대로 사용된 항목:
 
 **에이전트:**
-- `에이전트명` - model: `anthropic/claude-opus-4-5` (변환 불필요)
-
-**카테고리:**
-- `카테고리명` - model: `anthropic/claude-sonnet-4-5` (변환 불필요)
+- `[에이전트명]` - model: `[모델]` (변환 불필요)
 ```
-
-**변경됨 판단 기준:**
-- 소스코드 DEFAULT_MODEL ≠ 변환 후 모델 → **변경됨**
-- 소스코드 DEFAULT_MODEL = 변환 후 모델 → **유지됨**
-
-**예시:**
-- `opencode/grok-code` → `google/antigravity-gemini-3-flash` = **변경됨**
-- `anthropic/claude-opus-4-5` → `anthropic/claude-opus-4-5` = **유지됨**
 
 ## 보존 규칙
 
-- `$schema`, `google_auth` 등 `agents`, `categories` 외의 필드는 기존 값 유지
+- `$schema` 등 `agents`, `categories` 외의 필드는 기존 값 유지
 - 기존 설정 파일이 없으면 기본 템플릿으로 생성
 
-## 검색 참조 명령어
+## 참조 파일 (반드시 읽어야 함)
 
-```bash
-# 에이전트 및 카테고리 스키마 확인
-grep -A 30 "OverridableAgentNameSchema" src/config/schema.ts
-grep -A 15 "BuiltinCategoryNameSchema" src/config/schema.ts
+| 파일 | 확인 대상 |
+|------|-----------|
+| `src/config/schema.ts` | 에이전트/카테고리 스키마 (목록) |
+| `src/shared/model-requirements.ts` | fallback chain (기본 모델/variant) |
+| `src/tools/delegate-task/constants.ts` | 카테고리 기본값 (temperature, variant) |
+| `src/agents/*.ts` | 각 에이전트별 temperature |
 
-# 에이전트별 기본 설정 탐색 (개별 파일 읽기 권장)
-grep -rE "const DEFAULT_MODEL|temperature:" src/agents/
+## 변환 예시 (참고용)
 
-# 카테고리별 기본 설정 탐색
-grep -A 60 "DEFAULT_CATEGORIES" src/tools/sisyphus-task/constants.ts
 ```
-
-## 제외 대상 에이전트
-
-다음 에이전트들은 시스템 내부용이므로 사용자 설정에서 제외 가능:
-- `build`, `plan` - OpenCode 기본 에이전트 (동적 설정)
-- `OpenCode-Builder`, `Prometheus (Planner)` - 시스템 관리 에이전트
-
-단, 스키마에 포함되어 있으므로 사용자가 원하면 override 가능.
+[에이전트/카테고리]:
+  fallbackChain[0]: { providers: ["미지원provider"], model: "원본모델" }
+  → 변환 규칙 적용
+  → JSON: { "model": "변환된모델", "temperature": [있으면포함] }
+```
