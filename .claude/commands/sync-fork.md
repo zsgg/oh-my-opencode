@@ -42,7 +42,13 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
    - commit_hash: 전체 커밋 메시지
    ```
 
-2. **Upstream remote 확인**
+2. **fork-summary.md 생성**
+   - `fork.md`의 내용을 분석하여 사용자가 이해하기 쉬운 요약본 작성
+   - 주요 변경사항을 카테고리별로 정리
+   - 한 줄 요약 포함
+   - 파일 위치: `./fork-summary.md`
+
+3. **Upstream remote 확인**
    ```bash
    git remote -v
    ```
@@ -51,34 +57,28 @@ description: Fork 저장소를 upstream과 동기화 (fetch, rebase, force push,
    git remote add upstream https://github.com/code-yeongyu/oh-my-opencode.git
    ```
 
-3. **현재 상태 태그 생성 (rebase 전 백업)**
+4. **현재 상태 태그 생성 (rebase 전 백업)**
    ```bash
    git tag pre-sync/$(date +%Y%m%d-%H%M)
    ```
 
-4. **Upstream 브랜치에 rebase**
+5. **Upstream 브랜치에 rebase**
    ```bash
    git rebase upstream/dev
    ```
 
-5. **충돌 발생 시 해결**
+6. **충돌 발생 시 해결**
    - 충돌 파일 확인: `git status`
    - 해결 후: `git add <파일>` → `git rebase --continue`
 
-6. **main-zsgg 브랜치에 force push (태그 포함)**
+7. **main-zsgg 브랜치에 force push (태그 포함)**
    ```bash
    git checkout -B main-zsgg
    git push -u origin main-zsgg --force --tags
    ```
 
-7. **빌드**
+8. **빌드**
    ```bash
    bun install
    bun run build
    ```
-
-8. **fork-summary.md 생성**
-   - `fork.md`의 내용을 분석하여 사용자가 이해하기 쉬운 요약본 작성
-   - 주요 변경사항을 카테고리별로 정리
-   - 한 줄 요약 포함
-   - 파일 위치: `./fork-summary.md`
