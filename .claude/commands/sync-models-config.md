@@ -25,7 +25,7 @@ oh-my-opencode 소스코드의 최신 에이전트 및 카테고리 설정을 �
 
 ## 모델 변환 규칙
 
-사용 가능한 모델 공급자는 **codex**, **antigravity**, **claude**로 제한하며, 소스코드의 모델명을 아래 규칙에 따라 변환함.
+사용 가능한 모델 공급자는 **codex**, **github-copilot**, **claude**로 제한하며, 소스코드의 모델명을 아래 규칙에 따라 변환함.
 
 | 원본 모델 패턴 | 변환 후 모델 | 공급자 |
 |----------------|-------------|--------|
@@ -33,9 +33,9 @@ oh-my-opencode 소스코드의 최신 에이전트 및 카테고리 설정을 �
 | `openai/gpt-*-codex` | `openai/gpt-5.2` | codex |
 | `opencode/*` (모든 opencode 모델) | `anthropic/claude-sonnet-4-5` | claude |
 | `zai-coding-plan/*` (모든 zai 모델) | `anthropic/claude-sonnet-4-5` | claude |
-| `google/gemini-*-pro-preview` | `google/antigravity-gemini-3-pro-high` | antigravity |
-| `google/gemini-*-flash-preview` | `google/antigravity-gemini-3-flash` | antigravity |
-| `google/gemini-*-flash` | `google/antigravity-gemini-3-flash` | antigravity |
+| `google/gemini-*-pro-preview` | `github-copilot/gemini-3-pro-preview` | github-copilot |
+| `google/gemini-*-flash-preview` | `github-copilot/gemini-3-flash-preview` | github-copilot |
+| `google/gemini-*-flash` | `github-copilot/gemini-3-flash-preview` | github-copilot |
 | `anthropic/claude-haiku-*` | `anthropic/claude-sonnet-4-5` | claude |
 | `anthropic/claude-sonnet-*` | `anthropic/claude-sonnet-4-5` | claude |
 | `anthropic/claude-opus-*` | `anthropic/claude-opus-4-5` | claude |
