@@ -35,3 +35,12 @@ test-injection/
 notepad.md
 oauth-success.html
 *.bun-build
+
+# Temporary files
+**/CLAUDE.md
+
+# zsgg
+*.ko.md
+*-ko.md
+!README.ko.md
+bun.lock
