@@ -33,4 +33,12 @@ yarn.lock
 test-injection/
 notepad.md
 oauth-success.html
-.188e87dbff6e7fd9-00000000.bun-build
+
+# Temporary files
+**/CLAUDE.md
+
+# zsgg
+*.ko.md
+*-ko.md
+!README.ko.md
+bun.lock
