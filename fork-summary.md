@@ -1,204 +1,146 @@
-# Upstream 동기화 요약 (157개 커밋)
+# Upstream 동기화 요약 (48개 커밋)
 
-**동기화 일시**: 2026-01-31 15:00 KST
-**버전 범위**: v3.1.9 → v3.1.10
+**동기화 일시**: 2026-02-01 21:00 KST
+**버전 범위**: v3.1.10 → v3.2.0
+**새 태그**: v3.1.11, v3.2.0
 
 ---
 
 ## 한 줄 요약
 
-> **플러그인 초기화 데드락 수정, Kimi Provider 통합, Tmux 완전 구현, MCP OAuth 2.1, LSP vscode-jsonrpc 마이그레이션, 테스트 15배 속도 향상**
+> **Hephaestus 에이전트 추가, unstable-agent-babysitter 기본 활성화, Windows 호환성 대폭 개선, 프로세스 라이프사이클 관리 강화, 테스트 안정성 향상**
 
 ---
 
 ## 🔥 Critical Updates
 
-### 1. 플러그인 초기화 데드락 해결 (#1304)
-- **문제**: config handler ↔ OpenCode 서버 간 교착상태로 플러그인 시작 불가
-- **해결**: cache-only 모드로 fetchAvailableModels 호출
-- **영향**: 플러그인 시작 안정성 대폭 향상
+### 1. Hephaestus 에이전트 추가 (#1287)
+- 자율적으로 심층 작업을 수행하는 새로운 에이전트
+- 복잡한 멀티스텝 태스크 처리 능력 강화
+- 고도의 자율성과 문제 해결 능력
+- **영향**: 복잡한 작업 자동화 능력 대폭 향상
 
-### 2. Momus 에이전트 프롬프트 리팩토링
-- 392줄 → 125줄 단순화
-- APPROVAL BIAS: 기본 승인, blocker만 거부
-- 최대 3개 이슈만 거부 (overwhelming feedback 방지)
+### 2. unstable-agent-babysitter 기본 활성화
+- unstable 모델 자동 모니터링 기본 활성화
+- 불안정한 에이전트 실시간 감시 및 자동 복구
+- 프로덕션 안정성 대폭 향상
+- **영향**: 프로덕션 환경 안정성 크게 개선
 
-### 3. 테스트 스위트 15배 속도 향상 (#1284)
-- FakeTimers 구현: 104.6s → 7.01s
-- FakeTimeouts: ~26s → ~6.8s
-- CI 안정성 크게 개선
+### 3. Windows 호환성 대폭 개선 (#1102)
+- Windows 이벤트 리스너 이슈 해결
+- LSP segfault 버그 방지 (Bun 버전 체크)
+- CI retry 액션 Windows 호환성
+- **영향**: Windows 사용자 경험 크게 향상
+
+### 4. 프로세스 라이프사이클 관리 강화
+- 좀비 프로세스 완전 제거 (#1306)
+- 메모리 누수 방지 (#1058)
+- tmux 고아 프로세스 방지 (#1329)
+- 백그라운드 에이전트 세션 중단 개선
+- **영향**: 리소스 관리 및 안정성 최적화
 
 ---
 
 ## 🎯 주요 신규 기능
 
-### Model Resolution 개선
-**3-tier Fallback System**:
-1. provider-models cache
-2. models.json
-3. client.model.list() API
+### 태스크 관리 & UI 개선
+**Todo Continuation**:
+- continuation 프롬프트에 남은 태스크 목록 표시
+- 작업 진행 상황 가시성 향상
 
-**Kimi Provider 통합**:
-- kimi-for-coding 프로바이더 추가
-- Model ID: k2p5 (kimi-k2.5)
-- Atlas/Sisyphus/Prometheus fallback chain에 추가
+**/stop-continuation 명령어** (#1316):
+- 모든 continuation 메커니즘 중단
+- 사용자 제어권 강화
+- 세션 복구 시 설정 존중 (1회성 실행)
 
-**RequiresModel Field**:
-- 조건부 에이전트 활성화 (model 가용성 체크)
+### 백그라운드 에이전트 개선
+**isUnstableAgent 플래그**:
+- unstable 모델 자동 감지
+- minimax를 unstable 모델로 처리
 
-### Agent & Category 개편
-**Ultrabrain Category**:
-- Deep work mindset 재설계
-- 코드 스타일 요구사항 강화 (codebase pattern 검색 필수)
+**thinking_max_chars 옵션**:
+- 백그라운드 출력 크기 제어
+- 출력 최적화
 
-**Artistry Category**:
-- Ultrawork-mode에 추가
-- 비관습적 문제 처리 (Oracle은 conventional problems)
+**세션 타이틀 개선**:
+- task_metadata 블록 추가
+- 카테고리 정보 표시
 
-**Subagent UI Model Selection 제외**:
-- explore/librarian/oracle은 자체 fallback chain 사용
+### 시스템 & 환경
+**OpenCode GUI 감지** (#1352):
+- 모든 플랫폼에서 desktop GUI 설치 자동 감지
+- 환경 진단 기능 개선
 
-### Tmux Integration 완전 구현 (#1125)
-**State-first Architecture**:
-- Decision engine with replace action
-- 2D grid layout (divider-aware)
-- MIN_PANE_WIDTH: 53 → 52
+**GLM-4.7 Thinking Mode 지원**:
+- 추론 능력 강화
+- thinking mode 옵션 확장
 
-**Features**:
-- tmux respawn-pane으로 layout 보존
-- Mass eviction 방지
-- Background/sync sessions pane spawn callbacks
+### CI/CD & 개발 도구
+**자동 릴리스 노트 생성**:
+- conventional commit에서 구조화된 릴리스 노트 자동 생성
+- 릴리스 프로세스 자동화
 
-### MCP OAuth 2.1 (#1169)
-**RFC 준수**:
-- RFC 7591, 9728, 8414, 8707
+**Oracle 안전성 검토**:
+- 배포 전 안전성 체크 추가
 
-**CLI Commands**:
-- `mcp oauth login/logout/status`
-
-**보안**:
-- Secure token storage
-- Step-up authorization
-- 5분 timeout, credential redaction
-
-### LSP vscode-jsonrpc 마이그레이션 (#1095)
-- Custom JSON-RPC 구현 대체
-- ~60줄 코드 감소
-- Protocol handling 개선
+**MCP 매니저 개선**:
+- 테스트 커버리지 향상
+- 기능 강화
 
 ---
 
 ## 🔧 주요 버그 수정
 
+### 프로세스 & 메모리 관리
+- **좀비 attach 프로세스 방지**: 태스크 완료 시 세션 중단
+- **메모리 누수 방지**: completion 타이머 추적 및 취소
+- **좀비 프로세스 제거**: 적절한 프로세스 라이프사이클 관리
+- **tmux 고아 프로세스 방지**: kill-pane 전 Ctrl+C 전송
+
+### 설정 & 프롬프트
+- **Prometheus prompt_append 처리**: 올바른 설정 적용
+- **/stop-continuation 개선**: 1회성 실행, 세션 복구 시 존중
+
+### 테스트 안정성
+- **notifyParentSession 스텁**: 타이머 기반 테스트 안정화
+- **_resetForTesting() 일관성**: flaky 테스트 제거 (#1318)
+- **ToolContext 필드 추가**: 테스트 mock 개선
+
+### 환경 변수 & Git
+- **비대화형 환경 지원**: git 명령어에 환경 변수 항상 주입
+
+### CI/CD
+- **플랫폼 빌드 재시도**: 빌드 안정성 향상
+- **테스트 경로 정리**: 삭제된 파일 제거
+
+### 의존성
+- **vscode-jsonrpc 복원**: bun.lock 재생성
+
+### Rules Injector
+- **dead batch 코드 제거**: .sisyphus 파일 지원 추가
+
+---
+
+## 🔄 주요 리팩토링
+
+### 백그라운드 에이전트
+- 태스크 완료 알림에 카테고리 정보 표시
+- 태스크 타이밍 최적화
+- 상수 관리 개선
+
 ### Delegate Task
-- **Category UserModel Chain 복원** (#1227): resolved.model이 category default 포함하도록 수정
+- 세션 타이틀 포맷 개선
+- task_metadata 블록 추가
 
-### Run Command
-- **Race Condition 수정** (#1263): hasReceivedMeaningfulWork 플래그로 premature exit 방지
+### 에이전트 프롬프트
+- explore/librarian 프롬프트 4부 구조로 개선
+- 컨텍스트 명확성 향상
 
-### Background Agent
-- **Zombie Process 방지** (#1240, #1243): shutdown 시 child session abort
-
-### Model Resolver
-- **UI Model Selection 존중** (#1158): 우선순위 명확화
-- **Connected Providers Cache 사용** (#1227): availableModels empty 시 fallback
-- **Fallback Chain Skip**: cache 없을 때 OpenCode defaultModel 사용
-
-### Config
-- **Override.category 확장** (#1219, #1235): concrete config properties로 변환
-- **'dev-browser' 추가**: BrowserAutomationProviderSchema validation
-
-### Look-at
-- **JSON Parse Errors 처리** (#1216): user-friendly error message
-
-### Version Detection
-- **npm Global Install 수정** (#1194): process.execPath fallback
-
----
-
-## 🚀 CI/CD 개선
-
-### OIDC Trusted Publishing 전환
-**Benefits**:
-- Fresh OIDC token at publish time
-- 토큰 rotation 불필요
-- 빌드/퍼블리시 분리 (아티팩트 재사용)
-
-**Platform Publish**:
-- 7개 플랫폼 동시 빌드
-- Windows 7z 지원, explorer 사용 (shell injection 방지)
-
-### Test Isolation
-- Mock.module pollution 방지 (sequential execution)
-- Configurable timing (timing.ts)
-- Spy restore, afterEach cleanup
-
----
-
-## 📦 v3.1.1-v3.1.3 주요 변경사항
-
-### Ultrawork & Plan Agent
-- Plan agent 강제 호출 (MANDATORY section)
-- TL;DR, agent profile, execution waves
-- Prometheus mode 'all' (delegate_task 허용)
-
-### Prometheus Config
-- Fallback chain: opus → gpt-5.2 → gemini-3-pro
-- Self-delegation block
-
-### Subagent Question 차단
-- SDK-level + hook-level blocking
-- 자율 작업 보장
-
-### Agent Variant Resolution
-- Current model 기반 (static config 아님)
-
----
-
-## 🔧 v3.1.0 주요 변경사항
-
-### Connected Providers Cache (#1121)
-- Model availability 체크
-- provider-models.json 대체
-
-### Hooks & Compaction
-- **category-skill-reminder hook** (#1123)
-- **Active working context**: compaction summary에 files/code/references/state 포함
-
-### Documentation
-- Tmux integration (full options)
-- Server mode & shell functions
-
----
-
-## 📚 기타 주요 변경사항
-
-### Environment Variables (#1157)
-- OPENCODE_SERVER_PORT/HOSTNAME: 병렬 mission 포트 충돌 방지
-
-### Configuration Documentation (#1186)
-- 누락 옵션 전체 추가 (disabled_commands, sisyphus tasks/swarm, dynamic_context_pruning)
-
-### Ollama NDJSON (#1197)
-- stream: false 필수 (NDJSON vs JSON mismatch)
-- Troubleshooting guide
-
-### System-Reminder 키워드 트리거 방지 (#1155)
-- removeSystemReminders() (keyword detection 전 strip)
-
-### Skill Allowed-Tools YAML Array (#1163)
-- YAML array format 지원
-
-### systemDefaultModel Optional (#1136)
-- OpenCode built-in model fallback 사용
-
-### Reverts
-- v2.x to v3.x migration guide (AI agent 무단 merge)
-- oh-my-opencode-slim (외부 fork promotion)
-
-### Sisyphus Foundation (Wave 1)
-- SisyphusTasksConfig/SwarmConfig schema
-- Task JSON schema, Mailbox IPC protocol
+### 코드베이스 정리 (#1350, #1317)
+- BDD 주석, 파일 분할, 버그 수정
+- 중복 패턴 통합
+- 코드베이스 단순화
+- 고아 compaction-context-injector 훅 제거
 
 ---
 
@@ -206,116 +148,91 @@
 
 | 카테고리 | 개수 |
 |----------|------|
-| Features | 30+ |
-| Fixes | 40+ |
-| Refactor | 20+ |
-| Docs | 15+ |
-| Tests | 20+ |
-| Chore | 10+ |
-| CLA Signatures | 30+ |
-| **총합** | **157개** |
+| Features | 10 |
+| Fixes | 15 |
+| Refactor | 7 |
+| Docs | 1 |
+| Chore | 5 |
+| Releases | 2 |
+| CLA Signatures | 4 |
+| **총합** | **48개** |
 
 ---
 
 ## 🎯 영향 범위
 
 ### ✅ 개발자
-- **Kimi Provider**: 새로운 모델 옵션
-- **Tmux Integration**: Visual Multi-Agent 워크플로우
-- **MCP OAuth**: 보안 강화
-- **LSP vscode-jsonrpc**: 안정성 향상
-- **Config Override**: category 확장, thinking/reasoningEffort/providerOptions
-- **Delegate Task**: category userModel chain 복원
+- **Hephaestus 에이전트**: 복잡한 작업 자동화
+- **unstable-agent-babysitter**: 프로덕션 안정성
+- **thinking_max_chars**: 출력 크기 제어
+- **/stop-continuation**: 사용자 제어 강화
+- **GLM-4.7 thinking mode**: 추론 능력 향상
 
 ### ✅ 사용자
-- **플러그인 안정성**: 데드락 해결
-- **테스트 속도**: 15배 향상
-- **Model Resolution**: 3-tier fallback, fuzzy matching
-- **Agent 개편**: Ultrabrain, Artistry
-- **Background Agent**: zombie process 방지
-- **Ollama 지원**: NDJSON troubleshooting
+- **Windows 호환성**: 안정성 대폭 향상
+- **프로세스 관리**: 좀비 프로세스 제거, 메모리 누수 방지
+- **테스트 안정성**: flaky 테스트 제거
+- **Todo continuation**: 작업 진행 상황 가시성
 
 ### ✅ CI/CD
-- **OIDC Publishing**: 토큰 rotation 불필요
-- **Build Parallelism**: 7개 플랫폼 동시
-- **Test Isolation**: mock.module pollution 방지
+- **자동 릴리스 노트**: 릴리스 프로세스 자동화
+- **빌드 재시도**: 안정성 향상
+- **테스트 개선**: 안정적인 CI 파이프라인
 
 ---
 
 ## 🔐 보안 개선
 
-- **MCP OAuth 2.1**: RFC 준수, secure token storage
-- **Command Injection 방지**: explorer 사용 (Windows)
-- **Agent Isolation**: subagent question tool 차단
-- **Token Redaction**: credential leakage 방지
+- **unstable-agent-babysitter**: 불안정한 모델 자동 감시
+- **프로세스 격리**: 좀비 프로세스 방지
+- **리소스 관리**: 메모리 누수 방지
 
 ---
 
 ## 📖 Migration Guide
 
-### Kimi Provider
-```json
-{
-  "providers": {
-    "kimi-for-coding": {
-      "api_key": "$KIMI_API_KEY"
-    }
-  }
-}
-```
-
-### Tmux Integration
-```json
-{
-  "tmux": {
-    "enabled": true,
-    "layout": "two-column"
-  }
-}
-```
-
-**Shell Function (Fish)**:
-```fish
-function omo
-    set -l port (math (random) % 10000 + 10000)
-    opencode serve --port $port &
-    set -l pid $last_pid
-    sleep 1
-    opencode attach --port $port $argv
-    kill $pid
-end
-```
-
-### MCP OAuth
+### Hephaestus 에이전트 사용
 ```bash
-mcp oauth login --server-url https://example.com/oauth
-mcp oauth status
-mcp oauth logout --server-url https://example.com/oauth
+# 복잡한 멀티스텝 작업에 활용
+opencode delegate --agent hephaestus
 ```
 
-### Ollama Provider
+### /stop-continuation 명령어
+```bash
+# 세션 중 continuation 중단 필요 시
+/stop-continuation
+```
+
+### thinking_max_chars 옵션
 ```json
 {
-  "providers": {
-    "ollama": {
-      "base_url": "http://localhost:11434",
-      "stream": false  // REQUIRED
+  "background_output": {
+    "thinking_max_chars": 1000
+  }
+}
+```
+
+### unstable-agent-babysitter (자동 활성화)
+- 별도 설정 불필요 (기본 활성화)
+- unstable 모델 사용 시 자동 모니터링
+- 필요 시 disable 가능:
+```json
+{
+  "hooks": {
+    "unstable-agent-babysitter": {
+      "enabled": false
     }
   }
 }
 ```
 
-### Category Override
+### GLM-4.7 Thinking Mode
 ```json
 {
   "agents": {
-    "metis": {
-      "category": "ultrabrain",
+    "atlas": {
       "thinking": true,
-      "reasoningEffort": "xhigh",
-      "providerOptions": {
-        "customKey": "value"
-      }
+      "model": "zai-coding-plan/glm-4.7"
     }
   }
 }
@@ -326,95 +243,91 @@ mcp oauth logout --server-url https://example.com/oauth
 ## 🔗 주요 PR & Issues
 
 ### Critical PRs
-- #1304: Plugin initialization deadlock fix ⭐
-- #1284: Test suite optimization (15배 속도) 🏆
-- #1169: MCP OAuth 2.1 🔐
-- #1095: LSP vscode-jsonrpc migration
-- #1125: Tmux state-first architecture
+- #1287: Hephaestus 에이전트 추가 ⭐
+- #1352: OpenCode GUI 감지 개선
+- #1102: Windows 호환성 개선 🏆
+- #1350: 코드베이스 대규모 정리
 
 ### Major PRs
-- #1227: Delegate task category userModel chain
-- #1263: Run command race condition
-- #1240, #1243: Background agent zombie process
-- #1219, #1235: Config override expansion
-- #1197: Ollama NDJSON streaming guide
-
-### Issues
-- #1298: Prometheus sessions
-- #1301: Plugin deadlock
-- #1124: Ollama NDJSON
-- #1182: Version detection
-- #1129: systemDefaultModel required
+- #1316: /stop-continuation 명령어
+- #1318: 테스트 안정성 개선
+- #1317: 중복 패턴 제거
+- #1329: tmux 프로세스 관리
+- #1306: 좀비 프로세스 방지
+- #1058: 메모리 누수 방지
+- #1271: Prometheus 설정 처리
 
 ---
 
 ## 🙏 기여자 감사
 
-### Co-authors
-- justsisyphus (multiple PRs)
-- Sisyphus (Ultrawork collaboration)
-- @robin-watcha (deadlock fix)
-- TheEpTic (system-reminder fix)
-- DC (category model resolution docs)
-- wangxiaoya.2000@bytedance.com
-- 김연규
-- GitHub Actions
-
-### CLA Signers (30+)
-- @robin-watcha, @khduy, @KonaEspresso94, @kunal70006, @Zacks-Zhang, @Hisir0909, @gabriel-ecegi, @LeekJay, @Lynricsy, @mrdavidlaing, @KennyDizi, @youming-ai, @rooftop-Owl, @boguan, @misyuari, @ghtndl, @itsmylife44, @acamq, @craftaholic, @orientpine, @Jeremy-Kr, @moha-abdi, @MoerAI, @agno01, @zycaskevin
+### Contributors
+- **YeonGyu-Kim** (@code-yeongyu) - 주요 기능 개발, 릴리스 관리
+- **justsisyphus** (@justsisyphus) - 테스트 안정성, 백그라운드 에이전트, CI/CD 개선
+- **Sisyphus** (@sisyphus-dev-ai) - Think mode, LSP 개선
+- **Nguyễn Văn Tín** (@edxeth) - Windows 호환성
+- **gabriel-ecegi** (@gabriel-ecegi) - Prometheus 설정
+- **itsmylife44** (@itsmylife44) - Tmux 프로세스 관리
+- **Nguyen Khac Trung Kien** (@dmealing) - 좀비 프로세스 방지
+- **taetaetae** (@taetaetae) - CLA 기여
+- **github-actions[bot]** - 자동화 및 릴리스
 
 ---
 
 ## ⚡ Performance Highlights
 
-- **Test Suite**: 104.6s → 7.01s (15배 ⚡)
-- **CI/CD**: 7개 플랫폼 동시 빌드
-- **Model Resolution**: 3-tier fallback (빠른 cache)
+- **프로세스 관리**: 좀비 프로세스 제거, 메모리 누수 방지
+- **테스트 안정성**: flaky 테스트 제거
+- **CI/CD**: 빌드 재시도 로직으로 안정성 향상
 
 ---
 
 ## 🎉 주목할 만한 변경사항
 
-1. **플러그인 초기화 데드락 해결**: 가장 critical한 수정
-2. **테스트 15배 속도 향상**: FakeTimers/FakeTimeouts
-3. **Kimi Provider 통합**: 새로운 모델 옵션
-4. **Tmux 완전 구현**: Visual Multi-Agent 워크플로우
-5. **MCP OAuth 2.1**: 보안 강화
-6. **LSP vscode-jsonrpc**: 안정성 향상
-7. **Momus 프롬프트 단순화**: 392줄 → 125줄
-8. **OIDC Publishing**: 토큰 rotation 불필요
+1. **Hephaestus 에이전트**: 자율적 심층 작업 처리
+2. **unstable-agent-babysitter 기본 활성화**: 프로덕션 안정성 향상
+3. **Windows 호환성 대폭 개선**: Windows 사용자 경험 크게 향상
+4. **프로세스 라이프사이클 관리**: 좀비 프로세스 제거, 메모리 누수 방지
+5. **테스트 안정성 향상**: flaky 테스트 제거
+6. **코드베이스 정리**: 유지보수성 향상
+7. **/stop-continuation 명령어**: 사용자 제어 강화
+8. **자동 릴리스 노트 생성**: CI/CD 자동화
 
 ---
 
-## 📝 다음 단계
+## 📝 이전 동기화 (v3.1.9 → v3.1.10)
 
-1. ✅ fork.md 작성 완료
-2. ✅ fork-summary.md 작성 완료
-3. ⏳ Upstream remote 확인
-4. ⏳ 백업 태그 생성
-5. ⏳ Rebase upstream/dev
-6. ⏳ Force push to origin
-7. ⏳ 빌드 및 검증
+### 주요 변경사항
+- **플러그인 초기화 데드락 해결** (#1304): config handler ↔ OpenCode 서버 교착상태 해결
+- **테스트 15배 속도 향상** (#1284): FakeTimers 구현 (104.6s → 7.01s)
+- **Kimi Provider 통합**: kimi-for-coding 프로바이더 추가
+- **Tmux 완전 구현** (#1125): State-first Architecture, 2D Grid Layout
+- **MCP OAuth 2.1** (#1169): RFC 준수, secure token storage
+- **LSP vscode-jsonrpc 마이그레이션** (#1095): ~60줄 코드 감소
+
+자세한 내용은 fork.md "이전 동기화 이력" 섹션 참조.
 
 ---
 
 ## 💡 권장 사항
 
 ### 즉시 적용 권장
-- **플러그인 안정성**: v3.1.10으로 업그레이드
-- **테스트 환경**: CI timeout 개선 혜택
+- **v3.2.0 업그레이드**: Hephaestus 에이전트, unstable-agent-babysitter, Windows 호환성 개선
+- **프로세스 관리 개선**: 좀비 프로세스 제거, 메모리 누수 방지
+- **테스트 안정성**: CI/CD 안정성 향상
 
 ### 선택적 적용
-- **Kimi Provider**: API key 있으면 fallback chain에 추가
-- **Tmux Integration**: Visual Multi-Agent 워크플로우 필요 시
-- **MCP OAuth**: MCP 서버 인증 필요 시
+- **Hephaestus 에이전트**: 복잡한 작업 자동화 필요 시
+- **unstable-agent-babysitter**: 기본 활성화 (필요 시 disable)
+- **/stop-continuation**: continuation 제어 필요 시
+- **GLM-4.7 thinking mode**: 추론 능력 강화 필요 시
 
 ### 주의 사항
-- **Ollama**: stream: false 필수 설정
-- **Category Override**: thinking/reasoningEffort/providerOptions 활용
+- **unstable-agent-babysitter**: 기본 활성화됨 (필요 시 명시적으로 disable)
+- **compaction-context-injector**: 제거됨 (deprecated)
 
 ---
 
-**생성일**: 2026-01-31 15:00 KST
+**생성일**: 2026-02-01 21:00 KST
 **생성자**: zsgg (Oh-My-OpenCode fork maintainer)
 **도구**: Claude Sonnet 4.5 with oh-my-opencode sync-fork workflow
