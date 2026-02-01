@@ -1,333 +1,366 @@
-# Upstream 동기화 요약 (48개 커밋)
+# Oh-My-OpenCode Fork 동기화 요약 (v3.2.0 → v3.2.1)
 
-**동기화 일시**: 2026-02-01 21:00 KST
-**버전 범위**: v3.1.10 → v3.2.0
-**새 태그**: v3.1.11, v3.2.0
+**동기화 일시**: 2026-02-01 23:18 KST
+**비교 범위**: v3.2.0 → v3.2.1
+**커밋 수**: 5개
+**새 릴리즈**: v3.2.1
 
 ---
 
 ## 한 줄 요약
 
-> **Hephaestus 에이전트 추가, unstable-agent-babysitter 기본 활성화, Windows 호환성 대폭 개선, 프로세스 라이프사이클 관리 강화, 테스트 안정성 향상**
+> **통합 Claude Tasks 시스템 도입으로 태스크 관리 단순화 및 백그라운드 에이전트 안정성 개선**
 
 ---
 
 ## 🔥 Critical Updates
 
-### 1. Hephaestus 에이전트 추가 (#1287)
-- 자율적으로 심층 작업을 수행하는 새로운 에이전트
-- 복잡한 멀티스텝 태스크 처리 능력 강화
-- 고도의 자율성과 문제 해결 능력
-- **영향**: 복잡한 작업 자동화 능력 대폭 향상
+### 1. 통합 Claude Tasks 시스템 (#1356) 🎉
 
-### 2. unstable-agent-babysitter 기본 활성화
-- unstable 모델 자동 모니터링 기본 활성화
-- 불안정한 에이전트 실시간 감시 및 자동 복구
-- 프로덕션 안정성 대폭 향상
-- **영향**: 프로덕션 환경 안정성 크게 개선
+**핵심 변경**
+- 레거시 sisyphus-tasks, sisyphus-swarm 완전 제거
+- 5가지 작업을 단일 multi-action tool로 통합
+  - TaskCreate: 새 태스크 생성
+  - TaskGet: 태스크 조회
+  - TaskUpdate: 태스크 업데이트 (상태 전환, 소유자 검증)
+  - TaskList: 전체 태스크 요약
+  - TaskDelete: 태스크 삭제
 
-### 3. Windows 호환성 대폭 개선 (#1102)
-- Windows 이벤트 리스너 이슈 해결
-- LSP segfault 버그 방지 (Bun 버전 체크)
-- CI retry 액션 Windows 호환성
-- **영향**: Windows 사용자 경험 크게 향상
+**기술적 개선**
+- **Zod 스키마**: 타입 안전 검증
+- **원자적 파일 쓰기**: temp file + rename 패턴
+- **잠금 메커니즘**: 파일 기반, 30초 stale threshold
+- **순차 ID 생성**: lock 기반 동시성 제어
 
-### 4. 프로세스 라이프사이클 관리 강화
-- 좀비 프로세스 완전 제거 (#1306)
-- 메모리 누수 방지 (#1058)
-- tmux 고아 프로세스 방지 (#1329)
-- 백그라운드 에이전트 세션 중단 개선
-- **영향**: 리소스 관리 및 안정성 최적화
+**설정 변경**
+- `new_task_system_enabled`: 최상위 플래그로 기능 게이팅
+- `disabled_tools`: 특정 도구 비활성화 옵션 추가
+- Atlas, Sisyphus, Prometheus, Sisyphus-junior에 `task_*`, `teammate` 권한 부여
 
----
+**사용자 경험**
+- 10턴마다 task 도구 사용 리마인더
+- tasks-todowrite-disabler 훅으로 TodoWrite 대체
 
-## 🎯 주요 신규 기능
-
-### 태스크 관리 & UI 개선
-**Todo Continuation**:
-- continuation 프롬프트에 남은 태스크 목록 표시
-- 작업 진행 상황 가시성 향상
-
-**/stop-continuation 명령어** (#1316):
-- 모든 continuation 메커니즘 중단
-- 사용자 제어권 강화
-- 세션 복구 시 설정 존중 (1회성 실행)
-
-### 백그라운드 에이전트 개선
-**isUnstableAgent 플래그**:
-- unstable 모델 자동 감지
-- minimax를 unstable 모델로 처리
-
-**thinking_max_chars 옵션**:
-- 백그라운드 출력 크기 제어
-- 출력 최적화
-
-**세션 타이틀 개선**:
-- task_metadata 블록 추가
-- 카테고리 정보 표시
-
-### 시스템 & 환경
-**OpenCode GUI 감지** (#1352):
-- 모든 플랫폼에서 desktop GUI 설치 자동 감지
-- 환경 진단 기능 개선
-
-**GLM-4.7 Thinking Mode 지원**:
-- 추론 능력 강화
-- thinking mode 옵션 확장
-
-### CI/CD & 개발 도구
-**자동 릴리스 노트 생성**:
-- conventional commit에서 구조화된 릴리스 노트 자동 생성
-- 릴리스 프로세스 자동화
-
-**Oracle 안전성 검토**:
-- 배포 전 안전성 체크 추가
-
-**MCP 매니저 개선**:
-- 테스트 커버리지 향상
-- 기능 강화
+**영향**: 태스크 관리 워크플로우 완전히 재설계, 안정성 및 단순성 향상
 
 ---
 
-## 🔧 주요 버그 수정
+### 2. 백그라운드 에이전트 동시성 슬롯 누수 수정
 
-### 프로세스 & 메모리 관리
-- **좀비 attach 프로세스 방지**: 태스크 완료 시 세션 중단
-- **메모리 누수 방지**: completion 타이머 추적 및 취소
-- **좀비 프로세스 제거**: 적절한 프로세스 라이프사이클 관리
-- **tmux 고아 프로세스 방지**: kill-pane 전 Ctrl+C 전송
+**문제 분석**
+- startTask()에서 에러 발생 시 슬롯 해제했으나, processKey() catch 블록은 acquire()와 task.concurrencyKey 할당 사이 에러 시 슬롯 미해제
+- 결과: 동시성 슬롯 고갈 → 'Task failed to start within timeout' 에러
 
-### 설정 & 프롬프트
-- **Prometheus prompt_append 처리**: 올바른 설정 적용
-- **/stop-continuation 개선**: 1회성 실행, 세션 복구 시 존중
+**해결책**
+- **슬롯 소유권 통합**: processKey()가 task.concurrencyKey 설정 전까지 슬롯 소유
+- startTask()의 모든 사전 전송 release() 호출 제거
+- processKey() catch에 조건부 release 추가: task.concurrencyKey 미설정 시에만 해제
+- createResult.data?.id 검증 추가하여 잘못된 API 응답 포착
 
-### 테스트 안정성
-- **notifyParentSession 스텁**: 타이머 기반 테스트 안정화
-- **_resetForTesting() 일관성**: flaky 테스트 제거 (#1318)
-- **ToolContext 필드 추가**: 테스트 mock 개선
-
-### 환경 변수 & Git
-- **비대화형 환경 지원**: git 명령어에 환경 변수 항상 주입
-
-### CI/CD
-- **플랫폼 빌드 재시도**: 빌드 안정성 향상
-- **테스트 경로 정리**: 삭제된 파일 제거
-
-### 의존성
-- **vscode-jsonrpc 복원**: bun.lock 재생성
-
-### Rules Injector
-- **dead batch 코드 제거**: .sisyphus 파일 지원 추가
+**효과**
+- 백그라운드 작업 시작 실패 시 안정성 향상
+- 리소스 누수 방지
+- 타임아웃 에러 해결
 
 ---
 
-## 🔄 주요 리팩토링
+### 3. GitHub Copilot Gemini 모델명 수정
 
-### 백그라운드 에이전트
-- 태스크 완료 알림에 카테고리 정보 표시
-- 태스크 타이밍 최적화
-- 상수 관리 개선
+**문제**
+- CLI 설치 명령어가 잘못된 모델명 생성
+  - 기존: `gemini-3-pro`, `gemini-3-flash`
+  - 필요: `gemini-3-pro-preview`, `gemini-3-flash-preview`
+- GitHub Copilot API는 `-preview` 접미사 필수
 
-### Delegate Task
-- 세션 타이틀 포맷 개선
-- task_metadata 블록 추가
+**해결**
+- 올바른 모델 식별자로 수정
 
-### 에이전트 프롬프트
-- explore/librarian 프롬프트 4부 구조로 개선
-- 컨텍스트 명확성 향상
-
-### 코드베이스 정리 (#1350, #1317)
-- BDD 주석, 파일 분할, 버그 수정
-- 중복 패턴 통합
-- 코드베이스 단순화
-- 고아 compaction-context-injector 훅 제거
+**효과**
+- GitHub Copilot 사용자의 설치 프로세스 즉시 개선
+- API 호환성 확보
 
 ---
 
-## 📊 통계
+## 📊 변경사항 통계
 
-| 카테고리 | 개수 |
-|----------|------|
-| Features | 10 |
-| Fixes | 15 |
-| Refactor | 7 |
-| Docs | 1 |
-| Chore | 5 |
-| Releases | 2 |
-| CLA Signatures | 4 |
-| **총합** | **48개** |
+| 카테고리 | 개수 | 주요 내용 |
+|----------|------|----------|
+| Features | 1 | Claude Tasks 시스템 통합 |
+| Fixes | 2 | 동시성 슬롯 누수, Gemini 모델명 |
+| Refactor | 3 | bun-types 고정, tsconfig, 타입체크 |
+| Releases | 1 | v3.2.1 |
+| CLA | 1 | @hichoe95 |
+| **총합** | **5개** | - |
 
 ---
 
 ## 🎯 영향 범위
 
 ### ✅ 개발자
-- **Hephaestus 에이전트**: 복잡한 작업 자동화
-- **unstable-agent-babysitter**: 프로덕션 안정성
-- **thinking_max_chars**: 출력 크기 제어
-- **/stop-continuation**: 사용자 제어 강화
-- **GLM-4.7 thinking mode**: 추론 능력 향상
+- **Claude Tasks**: 단순화된 태스크 관리
+- **타입 안전성**: Zod 스키마 검증
+- **원자적 작업**: 파일 쓰기 안정성
+- **도구 비활성화**: disabled_tools 옵션
 
 ### ✅ 사용자
-- **Windows 호환성**: 안정성 대폭 향상
-- **프로세스 관리**: 좀비 프로세스 제거, 메모리 누수 방지
-- **테스트 안정성**: flaky 테스트 제거
-- **Todo continuation**: 작업 진행 상황 가시성
+- **백그라운드 안정성**: 슬롯 누수 해결
+- **GitHub Copilot**: 설치 프로세스 개선
+- **태스크 리마인더**: 작업 추적 개선
 
-### ✅ CI/CD
-- **자동 릴리스 노트**: 릴리스 프로세스 자동화
-- **빌드 재시도**: 안정성 향상
-- **테스트 개선**: 안정적인 CI 파이프라인
-
----
-
-## 🔐 보안 개선
-
-- **unstable-agent-babysitter**: 불안정한 모델 자동 감시
-- **프로세스 격리**: 좀비 프로세스 방지
-- **리소스 관리**: 메모리 누수 방지
+### ✅ 시스템
+- **레거시 제거**: sisyphus-tasks, sisyphus-swarm
+- **잠금 메커니즘**: 동시성 문제 해결
+- **원자적 쓰기**: 데이터 무결성
 
 ---
 
-## 📖 Migration Guide
+## 🔄 마이그레이션 가이드
 
-### Hephaestus 에이전트 사용
-```bash
-# 복잡한 멀티스텝 작업에 활용
-opencode delegate --agent hephaestus
-```
+### 필수 조치
 
-### /stop-continuation 명령어
-```bash
-# 세션 중 continuation 중단 필요 시
-/stop-continuation
-```
-
-### thinking_max_chars 옵션
+#### 1. 새로운 Claude Tasks 시스템 활성화
 ```json
 {
-  "background_output": {
-    "thinking_max_chars": 1000
-  }
+  "new_task_system_enabled": true
 }
 ```
 
-### unstable-agent-babysitter (자동 활성화)
-- 별도 설정 불필요 (기본 활성화)
-- unstable 모델 사용 시 자동 모니터링
-- 필요 시 disable 가능:
+#### 2. 레거시 시스템 제거 확인
+- `sisyphus-tasks` 의존성 제거
+- `sisyphus-swarm` 설정 제거
+- team namespace 사용 중단
+
+### 선택 조치
+
+#### 1. 도구 비활성화 (필요 시)
 ```json
 {
-  "hooks": {
-    "unstable-agent-babysitter": {
-      "enabled": false
+  "disabled_tools": ["TodoWrite"]
+}
+```
+
+#### 2. 태스크 저장 경로 커스터마이징
+```json
+{
+  "sisyphus": {
+    "tasks": {
+      "storage_path": "~/.opencode/tasks",
+      "claude_code_compat": false
     }
   }
 }
 ```
 
-### GLM-4.7 Thinking Mode
-```json
-{
-  "agents": {
-    "atlas": {
-      "thinking": true,
-      "model": "zai-coding-plan/glm-4.7"
-    }
-  }
+#### 3. GitHub Copilot 사용자
+- 설정 재생성 권장 (`opencode init` 또는 수동으로 모델명 수정)
+
+---
+
+## 💡 Breaking Changes
+
+### ⚠️ 레거시 태스크 시스템 제거
+- **영향 범위**: sisyphus-tasks, sisyphus-swarm 의존 워크플로우
+- **마이그레이션 경로**:
+  1. `new_task_system_enabled: true` 설정
+  2. 기존 태스크 데이터 백업 (필요 시)
+  3. 새로운 Claude Tasks API 사용
+- **타임라인**: 즉시
+
+### 🔄 설정 스키마 변경
+- `SisyphusTasksConfigSchema`에서 `enabled` 제거
+- `storage_path`, `claude_code_compat` 유지
+- `new_task_system_enabled` 최상위 플래그 추가
+
+---
+
+## 🏆 주요 기술적 개선
+
+### 원자적 파일 작업
+```typescript
+// temp file + rename 패턴으로 안전한 쓰기
+writeJsonAtomic(path, data)
+```
+
+### 파일 기반 잠금
+```typescript
+// 30초 stale threshold로 데드락 방지
+acquireLock(lockPath, { staleThreshold: 30000 })
+```
+
+### 타입 안전 검증
+```typescript
+// Zod 스키마로 런타임 검증
+TaskSchema.parse(taskData)
+```
+
+### 슬롯 소유권 통합
+```typescript
+// processKey()가 task.concurrencyKey 설정 전까지 슬롯 소유
+if (!task.concurrencyKey) {
+  concurrencyManager.release(taskKey)
 }
 ```
 
 ---
 
-## 🔗 주요 PR & Issues
+## 📖 새로운 API 사용 예제
 
-### Critical PRs
-- #1287: Hephaestus 에이전트 추가 ⭐
-- #1352: OpenCode GUI 감지 개선
-- #1102: Windows 호환성 개선 🏆
-- #1350: 코드베이스 대규모 정리
+### TaskCreate
+```typescript
+{
+  "action": "create",
+  "subject": "구현 태스크 제목",
+  "description": "상세 설명",
+  "activeForm": "구현 중" // spinner 표시용
+}
+```
 
-### Major PRs
-- #1316: /stop-continuation 명령어
-- #1318: 테스트 안정성 개선
-- #1317: 중복 패턴 제거
-- #1329: tmux 프로세스 관리
-- #1306: 좀비 프로세스 방지
-- #1058: 메모리 누수 방지
-- #1271: Prometheus 설정 처리
+### TaskUpdate
+```typescript
+{
+  "action": "update",
+  "taskId": "1",
+  "status": "in_progress", // pending → in_progress → completed
+  "owner": "agent-name",
+  "addBlocks": ["2"], // 종속성 설정
+  "metadata": { "key": "value" }
+}
+```
+
+### TaskList
+```typescript
+{
+  "action": "list"
+}
+// → 모든 태스크 요약 (id, subject, status, owner, blockedBy)
+```
 
 ---
 
-## 🙏 기여자 감사
+## 🔐 보안 & 안정성
 
-### Contributors
-- **YeonGyu-Kim** (@code-yeongyu) - 주요 기능 개발, 릴리스 관리
-- **justsisyphus** (@justsisyphus) - 테스트 안정성, 백그라운드 에이전트, CI/CD 개선
-- **Sisyphus** (@sisyphus-dev-ai) - Think mode, LSP 개선
-- **Nguyễn Văn Tín** (@edxeth) - Windows 호환성
-- **gabriel-ecegi** (@gabriel-ecegi) - Prometheus 설정
-- **itsmylife44** (@itsmylife44) - Tmux 프로세스 관리
-- **Nguyen Khac Trung Kien** (@dmealing) - 좀비 프로세스 방지
-- **taetaetae** (@taetaetae) - CLA 기여
-- **github-actions[bot]** - 자동화 및 릴리스
+### 동시성 제어
+- 파일 기반 잠금으로 race condition 방지
+- 슬롯 누수 완전 해결
 
----
+### 데이터 무결성
+- 원자적 쓰기로 부분 업데이트 방지
+- Zod 검증으로 잘못된 데이터 차단
 
-## ⚡ Performance Highlights
-
-- **프로세스 관리**: 좀비 프로세스 제거, 메모리 누수 방지
-- **테스트 안정성**: flaky 테스트 제거
-- **CI/CD**: 빌드 재시도 로직으로 안정성 향상
+### 리소스 관리
+- 정확한 슬롯 해제 타이밍
+- API 응답 검증 강화
 
 ---
 
 ## 🎉 주목할 만한 변경사항
 
-1. **Hephaestus 에이전트**: 자율적 심층 작업 처리
-2. **unstable-agent-babysitter 기본 활성화**: 프로덕션 안정성 향상
-3. **Windows 호환성 대폭 개선**: Windows 사용자 경험 크게 향상
-4. **프로세스 라이프사이클 관리**: 좀비 프로세스 제거, 메모리 누수 방지
-5. **테스트 안정성 향상**: flaky 테스트 제거
-6. **코드베이스 정리**: 유지보수성 향상
-7. **/stop-continuation 명령어**: 사용자 제어 강화
-8. **자동 릴리스 노트 생성**: CI/CD 자동화
+1. **Claude Tasks 시스템**: 단일 multi-action tool로 통합
+2. **원자적 파일 작업**: temp + rename 패턴
+3. **잠금 메커니즘**: 동시성 문제 완전 해결
+4. **슬롯 누수 수정**: 백그라운드 안정성 향상
+5. **Gemini 모델명**: GitHub Copilot 호환성
 
 ---
 
-## 📝 이전 동기화 (v3.1.9 → v3.1.10)
+## 🔗 관련 PR & Issues
 
-### 주요 변경사항
-- **플러그인 초기화 데드락 해결** (#1304): config handler ↔ OpenCode 서버 교착상태 해결
-- **테스트 15배 속도 향상** (#1284): FakeTimers 구현 (104.6s → 7.01s)
-- **Kimi Provider 통합**: kimi-for-coding 프로바이더 추가
-- **Tmux 완전 구현** (#1125): State-first Architecture, 2D Grid Layout
-- **MCP OAuth 2.1** (#1169): RFC 준수, secure token storage
-- **LSP vscode-jsonrpc 마이그레이션** (#1095): ~60줄 코드 감소
-
-자세한 내용은 fork.md "이전 동기화 이력" 섹션 참조.
+### Major PRs
+- **#1356**: 통합 Claude Tasks 시스템 구현 ⭐⭐⭐
+  - 기여자: YeonGyu-Kim, justsisyphus, Sisyphus
+  - 변경: 레거시 제거, 새 시스템 구현, 테스트 추가
+- **#1358**: CLA 서명 (@hichoe95)
 
 ---
 
-## 💡 권장 사항
+## 🙏 기여자
 
-### 즉시 적용 권장
-- **v3.2.0 업그레이드**: Hephaestus 에이전트, unstable-agent-babysitter, Windows 호환성 개선
-- **프로세스 관리 개선**: 좀비 프로세스 제거, 메모리 누수 방지
-- **테스트 안정성**: CI/CD 안정성 향상
+- **YeonGyu-Kim** (@code-yeongyu) - 주요 개발, 버그 수정
+- **justsisyphus** (@justsisyphus) - Claude Tasks 시스템
+- **Sisyphus** (@sisyphuslabs.ai) - Claude Tasks 시스템
+- **hichoe95** (@hichoe95) - CLA 기여
+- **github-actions[bot]** - 자동화 및 릴리스
+
+---
+
+## 📝 이전 동기화 이력
+
+### v3.2.0 (2026-02-01, 48개 커밋)
+
+#### 주요 하이라이트
+- **Hephaestus 에이전트**: 자율 심층 작업 처리
+- **unstable-agent-babysitter**: 기본 활성화
+- **Windows 호환성**: 대폭 개선
+- **프로세스 관리**: 좀비 프로세스 제거, 메모리 누수 방지
+- **/stop-continuation**: 사용자 제어 강화
+- **코드베이스 정리**: 유지보수성 향상
+
+### v3.1.9 → v3.1.10 (2026-01-31, 157개 커밋)
+
+#### Critical Fixes
+- **플러그인 초기화 데드락**: config handler ↔ OpenCode 서버 교착상태 해결
+- **테스트 15배 속도 향상**: FakeTimers (104.6s → 7.01s)
+
+#### 주요 통합
+- **Kimi Provider**: kimi-for-coding 프로바이더
+- **Tmux Integration**: State-first Architecture, 2D Grid
+- **MCP OAuth 2.1**: RFC 준수, secure token
+- **LSP vscode-jsonrpc**: ~60줄 코드 감소
+
+자세한 내용은 [fork.md](./fork.md) 이전 동기화 이력 참조.
+
+---
+
+## 💡 권장 조치
+
+### 즉시 적용
+- ✅ **v3.2.1 업그레이드**: Claude Tasks 시스템, 슬롯 누수 수정
+- ✅ **새 설정 추가**: `new_task_system_enabled: true`
+- ✅ **레거시 제거**: sisyphus-tasks, sisyphus-swarm 설정 삭제
 
 ### 선택적 적용
-- **Hephaestus 에이전트**: 복잡한 작업 자동화 필요 시
-- **unstable-agent-babysitter**: 기본 활성화 (필요 시 disable)
-- **/stop-continuation**: continuation 제어 필요 시
-- **GLM-4.7 thinking mode**: 추론 능력 강화 필요 시
+- 🔸 **GitHub Copilot**: 설정 재생성 (모델명 수정)
+- 🔸 **도구 비활성화**: `disabled_tools` 설정 (필요 시)
+- 🔸 **태스크 저장 경로**: 커스터마이징 (필요 시)
 
 ### 주의 사항
-- **unstable-agent-babysitter**: 기본 활성화됨 (필요 시 명시적으로 disable)
-- **compaction-context-injector**: 제거됨 (deprecated)
+- ⚠️ **Breaking Change**: 레거시 태스크 시스템 제거됨
+- ⚠️ **마이그레이션**: 기존 태스크 데이터 백업 권장
+- ⚠️ **설정 변경**: SisyphusTasksConfigSchema에서 `enabled` 제거
 
 ---
 
-**생성일**: 2026-02-01 21:00 KST
+## 📈 영향도 평가
+
+| 카테고리 | 영향도 | 상세 |
+|---------|--------|------|
+| 태스크 시스템 | 🔴 **High** | 레거시 제거, 새 시스템 마이그레이션 필수 |
+| 백그라운드 안정성 | 🔴 **High** | 슬롯 누수 해결, 안정성 즉시 향상 |
+| CLI 설정 | 🟡 **Medium** | GitHub Copilot 사용자 영향 |
+| 타입 안전성 | 🟢 **Low** | 내부 개선, 투명한 변경 |
+| 의존성 관리 | 🟢 **Low** | bun-types 고정, 내부 개선 |
+
+---
+
+## 🚀 Next Steps
+
+### 개발자
+1. `new_task_system_enabled: true` 설정
+2. 새로운 Claude Tasks API 익히기
+3. disabled_tools 활용 (필요 시)
+
+### 사용자
+1. v3.2.1로 업그레이드
+2. 백그라운드 작업 안정성 확인
+3. GitHub Copilot 설정 재생성 (해당 시)
+
+### 운영자
+1. 레거시 태스크 데이터 백업
+2. 마이그레이션 검증
+3. 모니터링 강화
+
+---
+
+**생성일**: 2026-02-01 23:18 KST
 **생성자**: zsgg (Oh-My-OpenCode fork maintainer)
-**도구**: Claude Sonnet 4.5 with oh-my-opencode sync-fork workflow
+**도구**: sync-fork 슬래시 커맨드 with Claude Sonnet 4.5
