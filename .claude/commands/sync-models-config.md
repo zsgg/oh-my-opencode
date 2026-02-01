@@ -29,8 +29,8 @@ oh-my-opencode 소스코드의 최신 에이전트 및 카테고리 설정을 �
 
 | 원본 모델 패턴 | 변환 후 모델 | 공급자 |
 |----------------|-------------|--------|
-| `openai/gpt-*` | `openai/gpt-5.2` | codex |
-| `openai/gpt-*-codex` | `openai/gpt-5.2` | codex |
+| `openai/gpt-*` | `openai/gpt-5.2` | openai |
+| `openai/gpt-*-codex` | `openai/gpt-5.2-codex` | openai |
 | `opencode/*` (모든 opencode 모델) | `anthropic/claude-sonnet-4-5` | claude |
 | `zai-coding-plan/*` (모든 zai 모델) | `anthropic/claude-sonnet-4-5` | claude |
 | `google/gemini-*-pro-preview` | `github-copilot/gemini-3-pro-preview` | github-copilot |
@@ -85,13 +85,21 @@ src/tools/delegate-task/constants.ts 파일을 읽고:
 - DEFAULT_CATEGORIES 객체에서 variant, temperature 값 확인
 ```
 
-### Step 2: 기존 설정 파일 읽기
+### Step 2: 기존 설정 파일 읽기 (보존 대상 필드 확인용)
+
+**중요: `agents`와 `categories` 내용은 무시하고, 보존해야 할 다른 필드만 확인함.**
 
 ```bash
 cat $HOME/.config/opencode/oh-my-opencode.json
 ```
 
+확인 대상:
+- `$schema`, `new_task_system_enabled`, `google_auth`, `lsp` 등 agents/categories 외의 필드
+- 이 필드들은 새 JSON에 그대로 유지됨
+
 ### Step 3: 데이터 수집 및 변환
+
+**기존 설정 파일의 `agents`와 `categories` 내용은 완전히 무시하고, 소스코드만 참조하여 새로 생성함.**
 
 소스코드에서 수집한 정보에 모델 변환 규칙을 적용:
 
@@ -142,27 +150,58 @@ cat $HOME/.config/opencode/oh-my-opencode.json
 
 ### Step 6: 변경사항 보고 (MANDATORY)
 
+**기존 설정 파일과 새로 생성된 설정 파일을 비교하여 차이점을 상세히 보고함.**
+
 ```markdown
 ## 동기화 결과
 
-### 변경됨 (모델 변환 적용됨)
+### 추가된 항목
 
-소스코드 fallback chain 첫 번째 값이 변환 규칙에 의해 다른 모델로 변환된 항목:
+**에이전트:**
+- `[에이전트명]` (신규 추가)
+  - model: `[모델]`
+  - variant: `[variant]` (있는 경우)
+  - temperature: `[temperature]` (있는 경우)
+  - 이유: 소스코드 스키마에 추가되었으나 기존 설정에 없었음
+
+**카테고리:**
+- `[카테고리명]` (신규 추가)
+  - model: `[모델]`
+  - variant: `[variant]` (있는 경우)
+  - 이유: 소스코드 스키마에 추가되었으나 기존 설정에 없었음
+
+### 제거된 항목
+
+**에이전트:**
+- `[에이전트명]` (제거됨)
+  - 이유: 소스코드 스키마에서 삭제되었거나 제외 대상에 포함됨
+
+**카테고리:**
+- `[카테고리명]` (제거됨)
+  - 이유: 소스코드 스키마에서 삭제됨
+
+### 변경된 항목
 
 **에이전트:**
 - `[에이전트명]`
-  - model: `[원본모델]` → `[변환후모델]`
+  - model: `[기존모델]` → `[새모델]`
+  - variant: `[기존variant]` → `[새variant]` (변경된 경우만)
+  - temperature: `[기존temperature]` → `[새temperature]` (변경된 경우만)
+  - 이유: 소스코드 fallback chain 업데이트
 
 **카테고리:**
 - `[카테고리명]`
-  - model: `[원본모델]` → `[변환후모델]`
+  - model: `[기존모델]` → `[새모델]`
+  - variant: `[기존variant]` → `[새variant]` (변경된 경우만)
+  - 이유: 소스코드 fallback chain 업데이트
 
-### 유지됨 (변환 없음)
-
-소스코드 fallback chain 값이 그대로 사용된 항목:
+### 유지된 항목
 
 **에이전트:**
-- `[에이전트명]` - model: `[모델]` (변환 불필요)
+- `[에이전트명]` - 변경사항 없음
+
+**카테고리:**
+- `[카테고리명]` - 변경사항 없음
 ```
 
 ## 보존 규칙
